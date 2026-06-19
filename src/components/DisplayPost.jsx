@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import matter from 'gray-matter';
-import { Container, Typography, Link } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { Box, Typography, Link, Stack } from "@mui/material";
+import { useParams, Link as LinkRouter } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Helmet } from "react-helmet-async";
+
+import { colors } from "../theme";
 
 const readingTime = (text) => {
     const wpm = 225;
@@ -13,6 +15,19 @@ const readingTime = (text) => {
     const time = Math.ceil(words / wpm);
     return `~${time} min read`;
 }
+
+const markdownSx = {
+    color: colors.text,
+    fontSize: "1.02rem",
+    lineHeight: 1.8,
+    "& p": { my: 2 },
+    "& h2": { mt: 5, mb: 2, fontSize: "1.6rem", fontWeight: 700 },
+    "& h3": { mt: 4, mb: 1.5, fontSize: "1.3rem", fontWeight: 700 },
+    "& ul, & ol": { pl: 3, my: 2 },
+    "& li": { mb: 0.75 },
+    "& hr": { border: "none", borderTop: `1px solid ${colors.border}`, my: 4 },
+    "& img": { borderRadius: 1, my: 2 },
+};
 
 function DisplayPost({ type }) {
     const params = useParams();
@@ -41,24 +56,64 @@ function DisplayPost({ type }) {
 
     if (markdownError) {
         return (
-            <>
+            <Box sx={{ textAlign: "center", py: 6 }}>
                 <Helmet title={`Daniel Reguero Blog | Post Not Found`} />
-                <Typography variant="h4" align="center" sx={{ paddingBottom: ".5em" }}>Not Found</Typography>
-                <Typography variant="body1" align="center">Sorry, couldn't find this post :&#40;</Typography>
-            </>
+                <Typography variant="h4" sx={{ mb: 1 }}>Not Found</Typography>
+                <Typography sx={{ color: colors.muted, mb: 3 }}>
+                    Sorry, couldn't find this post :&#40;
+                </Typography>
+                <Link component={LinkRouter} to={`/${type}`} color="secondary">
+                    &larr; back to {type}
+                </Link>
+            </Box>
         )
     }
-    return (title && date && markdownContent && 
-        <>
+
+    if (!(title && date && markdownContent)) {
+        return (
+            <Typography sx={{ color: colors.muted, textAlign: "center", py: 8 }}>
+                loading<Box component="span" className="cursor" />
+            </Typography>
+        );
+    }
+
+    return (
+        <Box sx={{ maxWidth: 720, mx: "auto" }}>
             <Helmet title={`Daniel Reguero Blog | ${title}`} />
-            <Typography variant="h4" align="center" sx={{ paddingBottom: ".25em" }}>{title}</Typography>
-            <Typography variant="h6" align="center" sx={{ color: "#666", fontSize: "1.1rem" }}>{date}</Typography>
-            <Typography variant="h6" align="center" sx={{ color: "#666", fontSize: ".8rem" }}>{readingTime(markdownContent)}</Typography>
-            <Container maxWidth="md">
+            <Box sx={{ mb: 4, pb: 3, borderBottom: `1px solid ${colors.border}` }}>
+                <Link
+                    component={LinkRouter}
+                    to={`/${type}`}
+                    color="secondary"
+                    sx={{ fontSize: "0.85rem", display: "inline-block", mb: 2 }}
+                >
+                    &larr; {type}
+                </Link>
+                <Typography variant="h4" sx={{ mb: 1.5, fontSize: { xs: "1.8rem", sm: "2.1rem" } }}>
+                    {title}
+                </Typography>
+                <Stack direction="row" spacing={1.5} sx={{ color: colors.muted, fontSize: "0.85rem" }}>
+                    <span>{date}</span>
+                    <span>&middot;</span>
+                    <span>{readingTime(markdownContent)}</span>
+                </Stack>
+            </Box>
+            <Box sx={markdownSx}>
                 <ReactMarkdown
                     components={{
-                        blockquote: ({ node, ...props }) => <blockquote {...props} style={{borderLeft: "1px dotted #fff", fontSize: "80%", margin: "2em 0", padding: "0 1.5em" }}/>,
-                        a: ({ node, ...props }) => <Link color="secondary" {...props} />,
+                        blockquote: ({ node, ...props }) => (
+                            <blockquote
+                                {...props}
+                                style={{
+                                    borderLeft: `3px solid ${colors.accent}`,
+                                    color: colors.muted,
+                                    fontSize: "95%",
+                                    margin: "2em 0",
+                                    padding: "0.25em 1.5em",
+                                }}
+                            />
+                        ),
+                        a: ({ node, ...props }) => <Link color="secondary" underline="always" {...props} />,
                         code({ node, inline, className, children, ...props }) {
                             const match = /language-(\w+)/.exec(className || '');
                             const codeString = (Array.isArray(children) ? children.join('') : String(children ?? '')).replace(/\n$/, '');
@@ -68,6 +123,7 @@ function DisplayPost({ type }) {
                                     style={a11yDark}
                                     language={match[1]}
                                     PreTag="div"
+                                    customStyle={{ borderRadius: 6, border: `1px solid ${colors.border}`, fontSize: "0.9rem" }}
                                     {...props}
                                 />
                             ) : (
@@ -75,7 +131,7 @@ function DisplayPost({ type }) {
                                     children={codeString}
                                     style={a11yDark}
                                     PreTag="span"
-                                    customStyle={{ padding: "2px 5px", backgroundColor: "#2c3437" }}
+                                    customStyle={{ padding: "2px 6px", borderRadius: 4, backgroundColor: "#2c3437", fontSize: "0.9em" }}
                                     {...props}
                                 />
                             )
@@ -84,8 +140,8 @@ function DisplayPost({ type }) {
                     }}
                     children={markdownContent}
                 />
-            </Container>
-        </>
+            </Box>
+        </Box>
     );
 }
 
