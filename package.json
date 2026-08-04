@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://happyzombies.github.io/",
+  "homepage": "https://dannyreg.github.io/",
   "scripts": {
     "dev": "vite",
     "prebuild": "node ./scripts/compose.js",

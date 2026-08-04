@@ -1,6 +1,6 @@
-https://happyzombies.github.io/
-https://happyzombies.github.io/?/blogs
-https://happyzombies.github.io/?/blogs/custom-node-js-errors
-https://happyzombies.github.io/?/projects
-https://happyzombies.github.io/?/about
-https://happyzombies.github.io/?/blogs
+https://dannyreg.github.io/
+https://dannyreg.github.io/?/blogs
+https://dannyreg.github.io/?/blogs/custom-node-js-errors
+https://dannyreg.github.io/?/projects
+https://dannyreg.github.io/?/about
+https://dannyreg.github.io/?/blogs

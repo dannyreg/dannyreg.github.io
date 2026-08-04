@@ -22,7 +22,7 @@ function About() {
                     I specialize in Node.js, Java, Go, and AWS, with deep experience in auth systems, customer-facing APIs, and multi-tenant B2B SaaS. I also occasionally dabble in Unity and contribute to open-source projects when I have the chance.
                 </Typography>
                 <Typography gutterBottom>
-                    Follow me on <Link color="secondary" href="https://github.com/HappyZombies" target="_blank" rel="noopener noreferrer">GitHub</Link> where I come up with my latest ideas and projects!
+                    Follow me on <Link color="secondary" href="https://github.com/dannyreg" target="_blank" rel="noopener noreferrer">GitHub</Link> where I come up with my latest ideas and projects!
                 </Typography>
             </StyledContainer>
         </>

@@ -30,7 +30,7 @@ const Nav = () => {
                         </Link>
                     </StyledTypography>
                     <StyledTypography sx={{ paddingRight: 0 }}>
-                        <Link component={LinkRouter} to="https://github.com/HappyZombies" color="secondary" underline="always" target="_blank" rel="noopener noreferrer">
+                        <Link component={LinkRouter} to="https://github.com/dannyreg" color="secondary" underline="always" target="_blank" rel="noopener noreferrer">
                             /github
                         </Link>
                     </StyledTypography>
