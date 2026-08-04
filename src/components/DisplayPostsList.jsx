@@ -1,51 +1,90 @@
-import { Typography, ListItem, ListItemText, Link, Grid } from "@mui/material";
+import { Box, Typography, Link, Stack } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
-const PostsLinkListItem = ({ type, post }) => {
-    if (post.draft) {
-        return true;
-    }
-    return (
-        <ListItem disableGutters>
-            <ListItemText
-                primary={
-                    <>
-                        <span style={{ color: "#666", paddingRight: 20 }}>{post.date}</span>
-                        <Link component={LinkRouter} to={`${post.id}`} color="secondary" underline="always" display="inline">
-                            {post.title}
-                        </Link>
-                        <span>
-                            <span style={{ padding: '0 10px' }}>-</span>
-                            &#91;{post.category}&#93;
-                        </span>
-                    </>
-                }
-            />
-        </ListItem>
-    )
-}
+import { colors } from "../theme";
 
-function DisplayPostsLists({ title, type, posts }) {
+const PostRow = ({ post }) => {
     return (
-        <>
-            <Helmet title={`Daniel Reguero Blog | ${title}`} />
-            <Grid
-                container
-                spacing={0}
-                direction="column"
-                alignItems="center"
-                justifyContent="center"
+        <Link
+            component={LinkRouter}
+            to={`${post.id}`}
+            sx={{
+                display: "block",
+                color: "inherit",
+                textDecoration: "none",
+                p: 2,
+                mx: -2,
+                borderRadius: 1.5,
+                transition: "background-color 0.15s ease",
+                "&:hover": {
+                    backgroundColor: colors.surface,
+                    opacity: 1,
+                },
+                "&:hover .post-title": { color: colors.accent },
+            }}
+        >
+            <Stack
+                direction={{ xs: "column", sm: "row" }}
+                alignItems={{ xs: "flex-start", sm: "baseline" }}
+                spacing={{ xs: 0.5, sm: 2 }}
             >
-                <Grid item xs={3}>
-                    <Typography variant="h4" gutterBottom>{title}</Typography>
-                </Grid>
-                <Grid item xs={5}>
-                    {posts.map((post, i) => <PostsLinkListItem post={post} type={type} key={i} />)}
-                </Grid>
-            </Grid>
-        </>
-    )
+                <Typography
+                    component="span"
+                    sx={{
+                        color: colors.muted,
+                        fontSize: "0.85rem",
+                        flexShrink: 0,
+                        minWidth: "6.5rem",
+                    }}
+                >
+                    {post.date}
+                </Typography>
+                <Typography
+                    component="span"
+                    className="post-title"
+                    sx={{ flex: 1, fontSize: "1.05rem", transition: "color 0.15s ease" }}
+                >
+                    {post.title}
+                </Typography>
+                <Box
+                    component="span"
+                    sx={{
+                        color: colors.accent,
+                        fontSize: "0.8rem",
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: 1,
+                        px: 1,
+                        py: 0.25,
+                        flexShrink: 0,
+                    }}
+                >
+                    {post.category}
+                </Box>
+            </Stack>
+        </Link>
+    );
+};
+
+function DisplayPostsList({ title, posts }) {
+    const visible = posts.filter((post) => !post.draft);
+    return (
+        <Box sx={{ maxWidth: 720, mx: "auto" }}>
+            <Helmet title={`Daniel Reguero Blog | ${title}`} />
+            <Typography variant="h4" sx={{ mb: 1 }}>
+                <Box component="span" sx={{ color: colors.accent, mr: 1 }}>#</Box>
+                {title}
+            </Typography>
+            <Typography sx={{ color: colors.muted, mb: 4, fontSize: "0.9rem" }}>
+                {visible.length} {visible.length === 1 ? "entry" : "entries"}
+            </Typography>
+            <Stack divider={<Box sx={{ borderBottom: `1px solid ${colors.border}` }} />}>
+                {visible.map((post, i) => (
+                    <PostRow post={post} key={i} />
+                ))}
+            </Stack>
+        </Box>
+    );
 }
 
-export default DisplayPostsLists;
+export default DisplayPostsList;

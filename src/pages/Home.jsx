@@ -1,46 +1,77 @@
-import { Container, Grid, Link, List, ListItem, ListItemText, Typography } from "@mui/material";
+import { Box, Container, Link, Stack, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
 import routes from "../routes";
+import { colors } from "../theme";
 
-const RouteLinkList = ({ route }) => {
+const HomeLink = ({ route }) => {
     const { name, path, newTab } = route;
-    const extraProps = {};
-    if(newTab) {
-        extraProps.target="_blank";
-        extraProps.rel="noopener noreferrer"
-    }
+    const extraProps = newTab
+        ? { target: "_blank", rel: "noopener noreferrer" }
+        : {};
     return (
-        <ListItem sx={{paddingTop: 0, paddingBottom: 0}}>
-            <ListItemText
-                primaryTypographyProps={{ variant: 'h6', style: { fontWeight: 'normal' } }}
-                primary={
-                    <Link component={LinkRouter} to={`${path}`} color="secondary" underline="always" {...extraProps}>
-                        {name}
-                    </Link>
-                }
-            />
-        </ListItem>
-    )
-}
+        <Link
+            component={LinkRouter}
+            to={path}
+            color="secondary"
+            {...extraProps}
+            sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.6rem",
+                fontSize: "1.15rem",
+                width: "fit-content",
+                transition: "transform 0.15s ease, opacity 0.15s ease",
+                "& .arrow": { color: colors.muted, transition: "color 0.15s ease" },
+                "&:hover": { transform: "translateX(6px)", opacity: 1 },
+                "&:hover .arrow": { color: colors.accent },
+            }}
+        >
+            <span className="arrow">&rarr;</span>
+            <span>{name}{newTab ? " ↗" : ""}</span>
+        </Link>
+    );
+};
 
 const Home = () => {
     return (
-        <Container>
-            <Helmet title='Daniel Reguero Blog' />
-            <Grid sx={{minHeight: "100vh"}} container spacing={0} alignItems="center" justifyItems="center">
-                <Grid item xs={12}>
-                    <Typography variant="h3" align="center" gutterBottom>Daniel Reguero</Typography>
-                    <Typography variant="h6" align="center" gutterBottom>&gt; I just wanna make stuff</Typography>
-                    <Typography variant="body1" align="center" gutterBottom><i>Isaiah 40:31</i></Typography>
-                    <List sx={{display: "table", margin: "0 auto"}}>
-                        {routes.map((route, i) => <RouteLinkList route={route} key={i} />)}
-                    </List>
-                </Grid>
-            </Grid>
+        <Container maxWidth="sm">
+            <Helmet title="Daniel Reguero Blog" />
+            <Box
+                sx={{
+                    minHeight: "100vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    py: 8,
+                }}
+            >
+                <Typography
+                    variant="h3"
+                    sx={{ fontWeight: 700, mb: 1.5, fontSize: { xs: "2.2rem", sm: "3rem" } }}
+                >
+                    Daniel Reguero
+                </Typography>
+
+                <Typography sx={{ fontSize: "1.2rem", color: colors.text, mb: 0.5 }}>
+                    <Box component="span" sx={{ color: colors.accent, mr: 1 }}>&gt;</Box>
+                    I just wanna make stuff
+                    <Box component="span" className="cursor" />
+                </Typography>
+
+                <Typography sx={{ color: colors.muted, fontStyle: "italic", mb: 4 }}>
+                    Isaiah 40:31
+                </Typography>
+
+                <Stack spacing={1.25}>
+                    {routes.map((route, i) => (
+                        <HomeLink route={route} key={i} />
+                    ))}
+                </Stack>
+            </Box>
         </Container>
-    )
-}
+    );
+};
 
 export default Home;
