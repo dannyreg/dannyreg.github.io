@@ -57,7 +57,6 @@ const Home = () => {
                 <Typography sx={{ fontSize: "1.2rem", color: colors.text, mb: 0.5 }}>
                     <Box component="span" sx={{ color: colors.accent, mr: 1 }}>&gt;</Box>
                     I just wanna make stuff
-                    <Box component="span" className="cursor" />
                 </Typography>
 
                 <Typography sx={{ color: colors.muted, fontStyle: "italic", mb: 4 }}>

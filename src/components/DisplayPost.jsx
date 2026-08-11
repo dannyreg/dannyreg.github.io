@@ -72,7 +72,7 @@ function DisplayPost({ type }) {
     if (!(title && date && markdownContent)) {
         return (
             <Typography sx={{ color: colors.muted, textAlign: "center", py: 8 }}>
-                loading<Box component="span" className="cursor" />
+                loading
             </Typography>
         );
     }

@@ -74,20 +74,7 @@ const theme = createTheme({
                 },
                 "*::-webkit-scrollbar-thumb:hover": {
                     background: colors.muted,
-                },
-                "@keyframes blink": {
-                    "0%, 49%": { opacity: 1 },
-                    "50%, 100%": { opacity: 0 },
-                },
-                ".cursor": {
-                    display: "inline-block",
-                    width: "0.6em",
-                    height: "1.05em",
-                    marginLeft: "0.15em",
-                    background: colors.accent,
-                    verticalAlign: "text-bottom",
-                    animation: "blink 1.1s step-end infinite",
-                },
+                }
             },
         },
         MuiLink: {
