@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Daniel Reguero Blog</title>
+  <link>https://daniel.reguero.dev</link>
+  <atom:link href="https://daniel.reguero.dev/feed.xml" rel="self" type="application/rss+xml" />
+  <description>Daniel Reguero&apos;s personal blog and project log</description>
+  <language>en-us</language>
+  <lastBuildDate>Wed, 12 Aug 2026 17:21:27 GMT</lastBuildDate>
+  <item>
+    <title>Ten Common Security Mistakes AI-Generated Apps Make</title>
+    <link>https://daniel.reguero.dev/blogs/ten-common-security-mistakes-ai-generated-apps-make</link>
+    <guid isPermaLink="true">https://daniel.reguero.dev/blogs/ten-common-security-mistakes-ai-generated-apps-make</guid>
+    <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+    <category>blogs</category>
+    <description><![CDATA[These are the most common security mistakes I have seen AI-generated apps make.]]></description>
+    <content:encoded><![CDATA[<p>Shipping an app has never been easier. It&#x27;s really cool to see that more people are getting into software development. Welcome!</p>
+<p>However, more and more projects are being released without doing the most basics of security checks. I&#x27;ve always had a knack for security and breaking apps, so this interested me. I have been working with a few clients and noticed a similar pattern of mistakes that fully AI-generated apps make. So my goal here is to enumarate the most common ones I have seen. I even made a skill to help developers who are helping out other people making apps with AI coding agents.</p>
+<p>I think education into not just how using AI is important, but the security and the bigger picture around software developemnt (beyond the code), is an important aspect to also know and learn when building apps with just Ai.</p>
+<p>So anyways witnout further ado let&#x27;s go down the list! Spoiltes: these</p>
+<p>The goal of the skill I made: These are the most common security mistakes I have seen AI-generated apps make, so we have this skill to identify and report them to us, so that a developer can prove it, enumerate and take appropriate action. The report is then taken into a developers hand or even handed straight back to the person who can take it from there.</p>
+<ol>
+<li>
+<p>Broken Auth: includes IDOR, CSRF, broken access control (OWASP Top 10), also just missing basic auth flows; no password changing, no forgot my password flows, etc. I even saw one where the e-mail switching feature was sent to the wrong e-mail?</p>
+</li>
+<li>
+<p>No Server Side Validation: missing per-route schemas; raw client input written straight to the DB or an LLM call</p>
+</li>
+<li>
+<p>No Rate Limiting: login, password reset, LLM, email/SMS endpoints with no limits</p>
+</li>
+<li>
+<p>Bad file upload validation: type checked only by extension/Content-Type, no size cap, SVG/script uploads</p>
+</li>
+<li>
+<p>Enumeration &amp; Injection Vulnerabilities: string-built queries, user-controlled sort/filter/column params</p>
+</li>
+<li>
+<p>Secrets: Good grief I can’t believe this is still a problem.</p>
+</li>
+<li>
+<p>Exposing PII Data: emails and other PII returned in API responses, search, or social features</p>
+</li>
+<li>
+<p>No Logging &amp; Monitoring: no error capture, no security event logs, no alerting on spikes. Not just for attackers going into the system but also for when users have bugs to report. How will you even know what&#x27;s wrong?</p>
+</li>
+<li>
+<p>No Backups: no backups, or backups that have never been restore-tested</p>
+</li>
+<li>
+<p>Supply Chain Vulnerabilities: AI can install dependencies that are old, and even have known CVEs. even setting up depende bot can be miles ahead, or just run npm audit, even if that isn&#x27;t the best it&#x27;s still better than not having any type of CVE check.</p>
+</li>
+</ol>
+<p>Bonus Interesting Ones:</p>
+<ul>
+<li>Admin Panels: admin UI living in the same app as customer-facing code, under-audited. I find it interesting how common this is, nothing wrong with it per say. But imagine if you have an admin panel and your app contains all the 10 issues I mentioned? Given that if someone could just easily escalate their priviledges to admin, they have access to all the sensitive and controlling data that your admin panel makes.</li>
+</ul>]]></content:encoded>
+  </item>
+  <item>
+    <title>Another Public API Has Been Walled Off</title>
+    <link>https://daniel.reguero.dev/blogs/another-public-api-has-been-walled-off</link>
+    <guid isPermaLink="true">https://daniel.reguero.dev/blogs/another-public-api-has-been-walled-off</guid>
+    <pubDate>Wed, 05 Aug 2026 00:00:00 GMT</pubDate>
+    <category>blogs</category>
+    <description><![CDATA[Yahoo, Strava, and Reddit keep gating their APIs, and hobbyists get caught in the middle of it.]]></description>
+    <content:encoded><![CDATA[<p>Back in 2024, I created my first real side project, <a href="https://ffawards.app">FFAwards.app</a>, a tool to generate awards for your fantasy football league. It was an incredible feeling to finally get a side project live in production. And truthfully, I really didn&#x27;t care too much about making any money from it; I just wanted to create a fun tool that people would find helpful and useful.</p>
+<p>Initially the project started off with Yahoo Fantasy, and I got a lot of great feedback to add more features and more fantasy leagues. So naturally the project grew to support Sleeper and ESPN. This year I spent a good amount of time doing a full rewrite of the UI, and I&#x27;m quite happy with it.</p>
+<p>Yahoo Fantasy is the main platform I use for the league with my close friends. But this year, Yahoo decided to make a major change to their developer API. Instead of simply registering a developer account and registering your app, you must now request access to the API.</p>
+<p>This wouldn&#x27;t be a problem, if not for the fact that Yahoo can take weeks or even months to respond back. So now it can be a bit of a waiting game until you hear back from them. In the meantime, my app along with other developer apps don&#x27;t work at all with Yahoo Fantasy, since they have revoked API access to existing apps.</p>
+<h2>Why has all this changed?</h2>
+<p>More and more API providers are starting to gatekeep their APIs, and... I definitely understand why.</p>
+<p>These developer tools came with a gentleman&#x27;s agreement kind of trust. They knew for a fact a human would go in and register and make these accounts. But nowadays, I&#x27;m sure these platforms are getting absolutely slammed by more crawlers and scrapers for AI companies. They can&#x27;t rely on the inherent &quot;good nature&quot; of API consumers anymore, so they have to gate access.</p>
+<p>I think it makes sense why they gatekeep; they are being forced to. It&#x27;s a resource drain on their compute, it&#x27;s also gatekeeping their data from LLMs simply reading it for free, and it&#x27;s also a way to stop people from using their API to build, say, an AI tool that uses their data when they&#x27;d rather build and monetize it themselves.</p>
+<p>But that&#x27;s the danger with building your house on someone else&#x27;s land. While these decisions from Yahoo make sense against companies and apps trying to monetize their data, hobbyists like me just trying to make fun and helpful tools get caught in the middle of this and have to wait until my broken app works again... hopefully.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>AI is Stealing Your Voice</title>
+    <link>https://daniel.reguero.dev/blogs/ai-is-stealing-your-voice</link>
+    <guid isPermaLink="true">https://daniel.reguero.dev/blogs/ai-is-stealing-your-voice</guid>
+    <pubDate>Thu, 09 Apr 2026 00:00:00 GMT</pubDate>
+    <category>blogs</category>
+    <description><![CDATA[Don't let AI take away the thing that makes us the most human, our voice.]]></description>
+    <content:encoded><![CDATA[<p>Throughout my career, I’ve had the pleasure of working alongside some incredibly intelligent software engineers. They’re the kind of engineers that you could talk for hours on end about any kind of topic. I enjoy hearing what they have to say and when they write something down, it&#x27;s worth reading.</p>
+<p>These engineers I&#x27;ve worked with aren&#x27;t the only ones of course, there is the broader online tech community of software engineers as well: Reddit, Hacker News, (...and to an extent, LinkedIn). I genuinely enjoy reading articles and blog posts from these experts in the software community, and the information and knowledge they have to share about a particular subject is not only interesting, but can be an incredible learning tool as well, especially for niche subjects.</p>
+<p>However, with AI, these voices and opinions are being replaced by a statistical machine instead.</p>
+<h2>&quot;Oh, I&#x27;m Reading AI&quot;</h2>
+<p>Now we all have used ChatGPT or some LLM tooling before. Come on, we kind of just know how it sounds. An LLM response usually has telltale signs. I see this especially in LinkedIn and Reddit, where the last sentence contains some engagement bait: &quot;Anyone else? Curious if...&quot;. Even odder is when the original poster replies back to comments with an AI response: &quot;That&#x27;s fair...&quot;, or &quot;You&#x27;re absolutely right...&quot;.</p>
+<p>At this point, whenever I read a post online now, I can just <em>tell</em> that it&#x27;s written by some LLM. And as I am reading a post, I have something in the back of my brain that triggers a reflex: <em>&quot;Oh, I&#x27;m reading AI&quot;</em>. Once that comes to mind, I kind of just... die inside lol... This isn&#x27;t something from an expert, this is just an output from an AI, which I could just be asking myself. Now yes, I understand that that is not the case for everyone; some people, believe it or not, can actually write professionally. But in this day and age, it&#x27;s harder and harder to tell what&#x27;s really from a person or not, so rightfully so I will assume that a post is just an AI post if it &quot;quacks and walks like a duck&quot;.</p>
+<p>And look, I also fully acknowledge that you can definitely get it to <em>not</em> sound too much like AI. But more often than not, the posts I read just seem like they are copying and pasting the very first LLM response and calling it a day, not even trying to modify it nor make it their own voice again.</p>
+<h2>Just Post What You Want To Say</h2>
+<p>I definitely am not opposed to using AI, in fact I did have it help me with this very post in itself (could you tell?), but I didn&#x27;t have it write the whole thing for me.</p>
+<p>Don&#x27;t let the AI think for you, let it work for you and let it be an extension of your thought, not a total replacement. I know that it&#x27;s efficient and comfortable to just let it type for you, but I would much rather read a typo filled and grammatically incorrect blog post than another generic AI post.</p>
+<p>If you have something to share, just write it out and post it. Have AI structure it better for you or don&#x27;t use it at all, but please just post your <strong>own</strong> thoughts. I <strong>want</strong> to hear what you have to say.</p>
+<h2>Conclusion</h2>
+<p>I thought of many different comparisons... but I guess you can compare this to a painting. If I see a beautiful painting and you tell me it’s AI, I will feel gross about it, why is that? It&#x27;s because there’s no human value to it. I don’t attach my kids&#x27; scribbles on the fridge because they’re a work of art, it’s because a human made it. Imagine if I hung AI art on my fridge instead? That’s how I feel when reading your AI generated posts.</p>
+<p>So as AI becomes more and more a part of our lives and work, I think there will be a genuine want and need for &quot;human only&quot; input and feedback again, it will almost seem nostalgic in a way. Yes, I believe that AI is useful and great, and yes I believe that it is here to stay. Just don&#x27;t let it replace your voice.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>Custom Node.js Errors</title>
+    <link>https://daniel.reguero.dev/blogs/custom-node-js-errors</link>
+    <guid isPermaLink="true">https://daniel.reguero.dev/blogs/custom-node-js-errors</guid>
+    <pubDate>Sat, 04 Mar 2023 00:00:00 GMT</pubDate>
+    <category>blogs</category>
+    <description><![CDATA[Extending the Node.js error class should be known about and used]]></description>
+    <content:encoded><![CDATA[<blockquote>
+<p>Update:  I&#x27;ve made a few changes to help clarify a few things. First off, I just wanted to say that everything I&#x27;m sharing here is just based on my own opinions and personal preferences when it comes to using custom Node.js Errors. I hope it&#x27;ll be useful to you too! I&#x27;ve also tweaked the error classes and code examples to make them a bit better - hope this post helps!</p>
+</blockquote>
+<p>A small yet powerful tool that I believe every Node.js developer should use and know about is the ability to create custom errors within their application.</p>
+<p>Creating custom errors gives us a few advantages:</p>
+<ol>
+<li>Allows us to create more specific unit tests for error scenarios.</li>
+<li>Including extra debugging information in the Error class, not limiting us to just <code>Error.message</code>.</li>
+<li>Categorizing errors promptly to pinpoint their exact location of occurrence.</li>
+</ol>
+<h2>Defining a Custom Error</h2>
+<p>To define a custom error class, simply extend the Error class. See some examples below.</p>
+<pre><code class="language-js">class InvalidInputError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = statusCode;
+  }
+}
+class DatabaseError extends Error {
+  constructor(message, statusCode, originalError) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = statusCode;
+    this.originalError = originalError;
+  }
+}
+</code></pre>
+<p>Now when we extend this class, we can have control over what new and additional properties we can send. So whether it&#x27;s to rethrow an error or capture it in a log, the custom error class can give us extra information on what is going on.</p>
+<p>To use the custom error, simply throw it the same way as the built-in error class.</p>
+<pre><code class="language-js">const { InvalidInputError, DatabaseError } = require(&#x27;../errors&#x27;);
+
+function validateUser(user) {
+  if (!user || !user.email || !user.email.includes(&#x27;@&#x27;)) {
+    throw new InvalidInputError(&#x27;Invalid user email&#x27;);
+  }
+
+  // This is just an example
+  try {
+    await someDatabaseCall(user.email);
+  } catch(err) {
+    throw new DatabaseError(&#x27;Database Error Occurred&#x27;, 500, err);
+  }
+
+}
+</code></pre>
+<p>In this example, we throw a custom error class for invalid user input, and we use a try-catch block to handle any errors that may be thrown during the database call. We throw a typical error message so don&#x27;t divulge too much information to the end user on what exactly happened.</p>
+<p>It&#x27;s important to pass the original error when throwing a custom error class like <code>DatabaseError</code>. This way, we don&#x27;t lose any information on the original cause of the error. Of course this may vary depending on the type of error you&#x27;re handling. In the case of <code>InvalidInputError</code>, we don&#x27;t need to pass the original error because we&#x27;re not re-throwing it from the database call.</p>
+<h2>Benefit 1: Specific Unit Tests</h2>
+<p>Imagine if we were to write a unit test for the method above. How would we test for the error case if we simply threw <code>new Error()</code> for the input validation or re-threw the error from the database call? Well, we&#x27;d have to catch the error based on the string value.</p>
+<pre><code class="language-js">describe(&#x27;validate user existing&#x27;, () =&gt; {
+  it(&#x27;should throw an error if the user cannot be found in the database&#x27;, async () =&gt; {
+    expect(() =&gt; await validateUser(&#x27;someemail@email.com&#x27;).to.throw(/Database Error Occurred/))
+  });
+});
+</code></pre>
+<p>But with the added benefit of our custom error, we can write a much cleaner unit test that doesn&#x27;t check for a string value, but rather the class type.</p>
+<pre><code class="language-js">const { DatabaseError } = require(&#x27;../errors&#x27;);
+
+describe(&#x27;validate user existing&#x27;, () =&gt; {
+  it(&#x27;should throw an error if the user cannot be found in the database&#x27;, async () =&gt; {
+    expect(() =&gt; await validateUser(&#x27;someemail@email.com&#x27;).to.throw(DatabaseError));
+  });
+});
+
+</code></pre>
+<p>This version of the unit test is much more specific, and we know the exact reason why this error occurred.</p>
+<h2>Benefit 2: Additional Properties</h2>
+<p>With us defining the error class now, we can pass as many variables as we need. One valuable variable to include is a timestamp, which can be extremely helpful when errors are captured in your logs.</p>
+<p>Moreover, if you have some sort of concept of a tracing/tracking id, you can pass it to the class and the tracing id will be present. This is especially useful if the error is thrown due to an uncaught exception.</p>
+<pre><code class="language-js">class DatabaseError extends Error {
+  constructor(message, traceId, statusCode, originalError) {
+    super(message);
+    this.name = this.constructor.name;
+    this.statusCode = statusCode;
+    this.originalError = originalError;
+    this.date = new Date();
+  }
+}
+
+const findUserById = async (id) =&gt; {
+  const traceId = generateRandomUUID(); // some uuid
+  logger.info(traceId, &quot;entering database call&quot;);
+  let user;
+  try {
+    user = await someDatabaseCall(id);
+  } catch (error) {
+    logger.info(traceId, &quot;an error occurred during the database query!&quot;);
+    throw new DatabaseError(&quot;Error when getting user.&quot;, traceId, 500, error);
+  }
+  return user;
+}
+</code></pre>
+<p>The code above will throw an error like so:</p>
+<pre><code class="language-text">DatabaseError: Error when getting user.
+    at script.js:14:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:193:25)
+    at async Promise.all (index 0)
+    at async ESMLoader.import (node:internal/modules/esm/loader:530:24)
+    at async loadESM (node:internal/process/esm_loader:91:5)
+    at async handleMainPromise (node:internal/modules/run_main:65:12) {
+  traceId: &#x27;56c84a0d-e8da-40e5-8618-f41a8a00cb65&#x27;,
+  date: 2023-02-20T21:35:07.020Z,
+  originalError: {Error here}
+}
+</code></pre>
+<h2>Benefit 3: Quicker to Identify</h2>
+<p>Notice from the error thrown above, that it contains our class name. This is also a major benefit because right away we can know what type of error this is/where it is coming from.</p>
+<p>In this case, since it&#x27;s a DatabaseError, we know that this pertains to an issue with our database.</p>
+<p>If errors aren&#x27;t categorized correctly, debugging can be a difficult task since developers have to manually analyze the message and stack trace. But by implementing this simple technique, we can simplify the debugging process tremendously by giving us a context clue right away.</p>
+<h2>Custom Errors That Every Dev Should Have</h2>
+<p>Generally, I would recommend at least these three types of custom errors. Of course, your use case may vary depending on what you are building.</p>
+<h3>Startup Error</h3>
+<pre><code class="language-js">
+class StartUpError extends Error {
+  constructor(message, traceId, originalError) {
+    super(message);
+    this.name = this.constructor.name;
+    this.originalError = originalError;
+    this.date = new Date();
+  }
+}
+</code></pre>
+<p>This error should be used during application startup, especially when connecting to any backing services, validating environment variables, and other related operations.</p>
+<h3>API Error</h3>
+<pre><code class="language-js">class ApiError extends Error {
+  constructor(message, traceId, originalError, statusCode = 500) {
+    super(message);
+    this.name = this.constructor.name;
+    this.traceId = traceId;
+    this.originalError = originalError;
+    this.statusCode = statusCode;
+    this.date = new Date();
+  }
+}
+</code></pre>
+<p>These errors apply to everything that will be sent via our API and will also include any HTTP error status codes.</p>
+<p>You can also get extra fancy and extend this base ApiError. This way you can have consistent HTTP error classes depending on the type of HTTP error you will be sending.</p>
+<pre><code class="language-js">class NotFoundError extends ApiError {
+    constructor(resource, traceId, originalError) {
+        super(`Could not find resource ${resource}`, traceId, originalError, 404);
+    }
+}
+</code></pre>
+<h3>Application Error</h3>
+<pre><code class="language-js">class ApplicationError extends Error {
+  constructor(message, traceId, originalError) {
+    super(message);
+    this.name = this.constructor.name;
+    this.originalError = originalError;
+    this.date = new Date();
+  }
+}
+</code></pre>
+<p>I use Application Errors for &quot;everything else&quot; and/or custom error failure cases that aren&#x27;t necessarily meant for a user. Additionally, in this example I call the class ApplicationError, but I prefer to use the name of my application. So if the name of my app is called &quot;Quiz App&quot;, I&#x27;d call it &quot;QuizAppError&quot;.</p>
+<p>You&#x27;ll notice that this class is the same as the StartUpError. But what I am taking advantage of here is the name of the class. When this error is thrown, I know that it is a specific error case that I have handled and caught, so it will contain the additional debugging information I have added.</p>
+<h2>Conclusion</h2>
+<p>Creating custom errors allows your application to be more flexible and easier to understand. Additionally, implementing them doesn&#x27;t require much extra effort, and I can guarantee you that you, you&#x27;re coworkers, and as well as your users, will appreciate these explicit and detailed error messages.</p>
+<h3>Resources and Tools</h3>
+<ul>
+<li><a href="https://nodejs.org/api/errors.html#class-error">Node.js Error Documentation</a></li>
+<li><a href="https://openai.com/">ChatGPT</a> for proof reading this post.</li>
+</ul>]]></content:encoded>
+  </item>
+  <item>
+    <title>3 Attempts Later: How I Finally Built My Blog Posting Site</title>
+    <link>https://daniel.reguero.dev/projects/blog-posting-site</link>
+    <guid isPermaLink="true">https://daniel.reguero.dev/projects/blog-posting-site</guid>
+    <pubDate>Sat, 04 Mar 2023 00:00:00 GMT</pubDate>
+    <category>projects</category>
+    <description><![CDATA[I'd like to talk about how I made this simple markdown blogging website.]]></description>
+    <content:encoded><![CDATA[<p>Hey there, this blog post is not quite ready yet. However, the overall gist of what I want to talk about is how it took me over two years to finally publish/make this blogging post site. Every time I picked it up, the dependencies I installed were always out of date, and with it came breaking changes. I&#x27;ll go into more detail about this later. Feel free to check out where this blogging site lives and use it for yourself if you wish. Happy coding!</p>
+<p><a href="https://github.com/dannyreg/dannyreg.github.io">Blog Posting Site Code</a></p>]]></content:encoded>
+  </item>
+</channel>
+</rss>
