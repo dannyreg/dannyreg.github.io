@@ -7,7 +7,9 @@ summary: 'These are the most common security mistakes I have seen AI-generated a
 
 Shipping an app has never been easier. It's really cool to see that more people are getting into software development. Welcome!
 
-However, more and more projects are being released without doing the most basics of security checks. I've always had a knack for security and breaking apps, so this interested me. I have been working with a few clients and noticed a similar pattern of mistakes that fully AI-generated apps make. So my goal here is to enumarate the most common ones I have seen. I even made a skill to help developers who are helping out other people making apps with AI coding agents.
+However, more and more projects are being released without doing the most basics of security checks.
+
+I have been working with a few clients and noticed a similar pattern of mistakes that fully AI-generated apps make. So my goal here is to enumarate the most common ones I have seen. I even made a skill to help developers who are helping out other people making apps with AI coding agents. Of course a non-technical person can use it too; but using Anthropics own words "
 
 I think education into not just how using AI is important, but the security and the bigger picture around software developemnt (beyond the code), is an important aspect to also know and learn when building apps with just Ai.
 
