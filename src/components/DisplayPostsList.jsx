@@ -1,8 +1,8 @@
 import { Box, Typography, Link, Stack } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 
 import { colors } from "../theme";
+import Seo from "./Seo";
 
 const PostRow = ({ post }) => {
     return (
@@ -66,12 +66,16 @@ const PostRow = ({ post }) => {
     );
 };
 
-function DisplayPostsList({ title, posts }) {
+function DisplayPostsList({ title, posts, path }) {
     const visible = posts.filter((post) => !post.draft);
     return (
         <Box sx={{ maxWidth: 720, mx: "auto" }}>
-            <Helmet title={`Daniel Reguero Blog | ${title}`} />
-            <Typography variant="h4" sx={{ mb: 1 }}>
+            <Seo
+                title={`Daniel Reguero Blog | ${title}`}
+                description={`${visible.length} ${title.toLowerCase()} by Daniel Reguero.`}
+                path={path}
+            />
+            <Typography variant="h4" component="h1" sx={{ mb: 1 }}>
                 <Box component="span" sx={{ color: colors.accent, mr: 1 }}>#</Box>
                 {title}
             </Typography>

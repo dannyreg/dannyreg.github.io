@@ -1,13 +1,34 @@
 import { Box, Typography, Link } from "@mui/material";
-import { Helmet } from "react-helmet-async";
 
 import { colors } from "../theme";
+import { SITE_URL, SITE_NAME } from "../config";
+import Seo from "../components/Seo";
+
+const ABOUT_DESCRIPTION = "Daniel Reguero is a senior software engineer specializing in Node.js, Java, Go, and AWS, with deep experience in auth systems, customer-facing APIs, and multi-tenant B2B SaaS.";
+
+const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: SITE_NAME,
+    url: SITE_URL,
+    jobTitle: "Senior Software Engineer",
+    description: ABOUT_DESCRIPTION,
+    sameAs: [
+        "https://github.com/dannyreg",
+        "https://www.linkedin.com/in/daniel-reguero/",
+    ],
+};
 
 function About() {
     return (
         <Box sx={{ maxWidth: 720, mx: "auto" }}>
-            <Helmet title="Daniel Reguero Blog | About" />
-            <Typography variant="h4" sx={{ mb: 4 }}>
+            <Seo
+                title="Daniel Reguero Blog | About"
+                description={ABOUT_DESCRIPTION}
+                path="/about"
+                jsonLd={personJsonLd}
+            />
+            <Typography variant="h4" component="h1" sx={{ mb: 4 }}>
                 <Box component="span" sx={{ color: colors.accent, mr: 1 }}>#</Box>
                 About
             </Typography>

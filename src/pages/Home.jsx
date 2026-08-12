@@ -1,9 +1,21 @@
 import { Box, Container, Link, Stack, Typography } from "@mui/material";
 import { Link as LinkRouter } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 
 import routes from "../routes";
 import { colors } from "../theme";
+import { SITE_URL, SITE_NAME } from "../config";
+import Seo from "../components/Seo";
+
+const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: SITE_NAME,
+    url: SITE_URL,
+    sameAs: [
+        "https://github.com/dannyreg",
+        "https://www.linkedin.com/in/daniel-reguero/",
+    ],
+};
 
 const HomeLink = ({ route }) => {
     const { name, path, newTab } = route;
@@ -37,7 +49,12 @@ const HomeLink = ({ route }) => {
 const Home = () => {
     return (
         <Container maxWidth="sm">
-            <Helmet title="Daniel Reguero Blog" />
+            <Seo
+                title="Daniel Reguero Blog"
+                description="Daniel Reguero's personal blog and project log — writing on Node.js, AWS, AI, and software engineering."
+                path="/"
+                jsonLd={personJsonLd}
+            />
             <Box
                 sx={{
                     minHeight: "100vh",
@@ -49,6 +66,7 @@ const Home = () => {
             >
                 <Typography
                     variant="h3"
+                    component="h1"
                     sx={{ fontWeight: 700, mb: 1.5, fontSize: { xs: "2.2rem", sm: "3rem" } }}
                 >
                     Daniel Reguero

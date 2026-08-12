@@ -21,9 +21,9 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/" element={<Nav />}>
             <Route path="/about" element={<About />} />
-            <Route path="/projects" element={<DisplayPostsList posts={posts.projects} title="Projects" />} />
+            <Route path="/projects" element={<DisplayPostsList posts={posts.projects} title="Projects" path="/projects" />} />
             <Route path="/projects/:id" element={<DisplayPost type="projects" />} />
-            <Route path="/blogs" element={<DisplayPostsList posts={posts.blogs} title="Blog Posts" />} />
+            <Route path="/blogs" element={<DisplayPostsList posts={posts.blogs} title="Blog Posts" path="/blogs" />} />
             <Route path="/blogs/:id" element={<DisplayPost type="blogs" />} />
             <Route path='*' element={<NotFound />} />
           </Route>

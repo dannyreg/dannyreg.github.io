@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://dannyreg.github.io/",
+  "homepage": "https://daniel.reguero.dev/",
   "scripts": {
     "dev": "vite",
     "prebuild": "node ./scripts/compose.js",

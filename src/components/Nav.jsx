@@ -9,6 +9,7 @@ const navLinks = [
     { label: "/projects", to: "/projects", match: "/projects" },
     { label: "/about", to: "/about", match: "/about" },
     { label: "/github", to: "https://github.com/dannyreg", external: true },
+    { label: "/rss", to: "/feed.xml", external: true },
 ];
 
 const NavLink = ({ link, pathname }) => {

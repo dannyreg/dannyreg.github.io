@@ -5,9 +5,10 @@ import { Box, Typography, Link, Stack } from "@mui/material";
 import { useParams, Link as LinkRouter } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Helmet } from "react-helmet-async";
 
 import { colors } from "../theme";
+import { SITE_NAME } from "../config";
+import Seo from "./Seo";
 
 const readingTime = (text) => {
     const wpm = 225;
@@ -35,6 +36,7 @@ function DisplayPost({ type }) {
     const [markdownError, setMarkdownError] = useState(false);
     const [title, setTitle] = useState("");
     const [date, setDate] = useState("");
+    const [summary, setSummary] = useState("");
     useEffect(() => {
         if (type === "blogs" || type === "projects") {
             const fetchMarkdownFile = async () => {
@@ -46,6 +48,7 @@ function DisplayPost({ type }) {
                 setMarkdownContent(matterObj.content);
                 setTitle(matterObj.data.title);
                 setDate(matterObj.data.date);
+                setSummary(matterObj.data.summary || "");
             }).catch(err => {
                 setMarkdownError(true);
                 console.log({ err });
@@ -57,8 +60,12 @@ function DisplayPost({ type }) {
     if (markdownError) {
         return (
             <Box sx={{ textAlign: "center", py: 6 }}>
-                <Helmet title={`Daniel Reguero Blog | Post Not Found`} />
-                <Typography variant="h4" sx={{ mb: 1 }}>Not Found</Typography>
+                <Seo
+                    title="Daniel Reguero Blog | Post Not Found"
+                    description="Sorry, couldn't find this post."
+                    path={`/${type}/${params.id}`}
+                />
+                <Typography variant="h4" component="h1" sx={{ mb: 1 }}>Not Found</Typography>
                 <Typography sx={{ color: colors.muted, mb: 3 }}>
                     Sorry, couldn't find this post :&#40;
                 </Typography>
@@ -77,9 +84,25 @@ function DisplayPost({ type }) {
         );
     }
 
+    const articleJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: title,
+        description: summary || undefined,
+        datePublished: date,
+        author: { "@type": "Person", name: SITE_NAME },
+    };
+
     return (
         <Box sx={{ maxWidth: 720, mx: "auto" }}>
-            <Helmet title={`Daniel Reguero Blog | ${title}`} />
+            <Seo
+                title={`Daniel Reguero Blog | ${title}`}
+                description={summary || `${title} — ${SITE_NAME}`}
+                path={`/${type}/${params.id}`}
+                type="article"
+                publishedDate={date}
+                jsonLd={articleJsonLd}
+            />
             <Box sx={{ mb: 4, pb: 3, borderBottom: `1px solid ${colors.border}` }}>
                 <Link
                     component={LinkRouter}
@@ -89,7 +112,7 @@ function DisplayPost({ type }) {
                 >
                     &larr; {type}
                 </Link>
-                <Typography variant="h4" sx={{ mb: 1.5, fontSize: { xs: "1.8rem", sm: "2.1rem" } }}>
+                <Typography variant="h4" component="h1" sx={{ mb: 1.5, fontSize: { xs: "1.8rem", sm: "2.1rem" } }}>
                     {title}
                 </Typography>
                 <Stack direction="row" spacing={1.5} sx={{ color: colors.muted, fontSize: "0.85rem" }}>
