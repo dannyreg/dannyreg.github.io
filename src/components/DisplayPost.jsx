@@ -7,7 +7,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { a11yDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { colors } from "../theme";
-import { SITE_NAME } from "../config";
+import { SITE_NAME, SITE_URL } from "../config";
 import Seo from "./Seo";
 
 const readingTime = (text) => {
@@ -136,7 +136,13 @@ function DisplayPost({ type }) {
                                 }}
                             />
                         ),
-                        a: ({ node, ...props }) => <Link color="secondary" underline="always" {...props} />,
+                        a: ({ node, href, ...props }) => {
+                            const isExternal = /^https?:\/\//.test(href) && !href.startsWith(SITE_URL);
+                            const extraProps = isExternal
+                                ? { target: "_blank", rel: "noopener noreferrer" }
+                                : {};
+                            return <Link href={href} color="secondary" underline="always" {...extraProps} {...props} />;
+                        },
                         code({ node, inline, className, children, ...props }) {
                             const match = /language-(\w+)/.exec(className || '');
                             const codeString = (Array.isArray(children) ? children.join('') : String(children ?? '')).replace(/\n$/, '');
