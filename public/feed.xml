@@ -6,55 +6,182 @@
   <atom:link href="https://daniel.reguero.dev/feed.xml" rel="self" type="application/rss+xml" />
   <description>Daniel Reguero&apos;s personal blog and project log</description>
   <language>en-us</language>
-  <lastBuildDate>Wed, 12 Aug 2026 17:17:56 GMT</lastBuildDate>
+  <lastBuildDate>Tue, 18 Aug 2026 00:28:10 GMT</lastBuildDate>
+  <item>
+    <title>Ten Common Security Mistakes AI-Generated Apps Make</title>
+    <link>https://daniel.reguero.dev/blogs/ten-common-security-mistakes-ai-generated-apps-make-v2</link>
+    <guid isPermaLink="true">https://daniel.reguero.dev/blogs/ten-common-security-mistakes-ai-generated-apps-make-v2</guid>
+    <pubDate>Mon, 17 Aug 2026 00:00:00 GMT</pubDate>
+    <category>blogs</category>
+    <description><![CDATA[These are the most common security mistakes I have seen AI-generated apps make.]]></description>
+    <content:encoded><![CDATA[<p>Shipping an app has never been easier. It&#x27;s really cool to see that more people are getting into software development. Welcome!</p>
+<p>However, more and more projects are being released without doing the most basic of security checks.</p>
+<p>I think education into not just how to use AI, but the security and the bigger picture around software development (beyond the code), is an important aspect to also know and learn when building apps with just AI.</p>
+<p>So let&#x27;s go down the list shall we?</p>
+<h2>1. Broken Access Control</h2>
+<p>At number one we have broken access control, which is not only the most common issue I have run into, it&#x27;s also OWASP&#x27;s number one: <a href="https://owasp.org/Top10/2021/A01_2021-Broken_Access_Control/">A01:2021 Broken Access Control</a>. In OWASP&#x27;s dataset, 94% of applications were tested for some form of broken access control, and it had over 318,000 occurrences, which is more than any other category. It&#x27;s <em>that</em> big of a problem!</p>
+<p>It&#x27;s definitely the most serious issue. This can come in different ways and forms, but the most common versions of this that I have seen are: escalating roles from free to pro without paying and accessing/editing resources you don&#x27;t own.</p>
+<h6>The Fix:</h6>
+<p>Your server must check on every request that the authenticated user is actually allowed to touch the resource they&#x27;re asking for. Never trust the client to enforce this. But better yet, if your database can support policies, implement them. Supabase, for example, allows you to set <a href="https://supabase.com/docs/guides/database/postgres/row-level-security">Row Level Security</a>, which lets you write policies directly in Postgres that filter which rows each user can read or write (typically keyed off <code>auth.uid()</code>). That way, even if your app code forgets a check, the database itself refuses to hand over rows that don&#x27;t belong to that user. Consider also the idea <a href="https://www.cloudflare.com/learning/security/glossary/what-is-zero-trust/">zero trust</a> but for your app, where you give the least amount of access to everyone and simply go up from there.</p>
+<h2>2. No Server Side Validation</h2>
+<p>Endpoints can receive essentially any JSON request body and the app will handle it. What happens when a malicious user sends a Shakespeare novel instead of their first name? It might be funny, but it&#x27;s not something you want to be dealing with. And what if it&#x27;s not a long text but a malicious HTML/script tag that your website then renders on the page? Now you&#x27;re open to <a href="https://owasp.org/www-community/attacks/xss/">XSS</a>.</p>
+<p>The nastier version I&#x27;ve seen is when update endpoints accept <em>any</em> field you send them, allowing you to update properties on the database schema without any checks. If there&#x27;s no validation on your &quot;update account&quot; endpoint, a user can simply upgrade their free account to pro for free (which is still part of broken access control and pertains to permission checks). Or what if you have AI features paywalled, but you give a user three tries to try out the AI feature? Well with no request validation, you can simply send a request like so</p>
+<pre><code class="language-bash">curl -X PATCH https://myapp.com/api/me \
+  -H &quot;Authorization: Bearer &lt;your-own-token&gt;&quot; \
+  -d &#x27;{&quot;plan&quot;: &quot;pro&quot;, &quot;aiCreditsRemaining&quot;: 999999}&#x27;
+</code></pre>
+<p>This won&#x27;t just affect your database, it can also affect third-party APIs that you&#x27;re using. If you aren&#x27;t validating the user&#x27;s input when you send their request to your AI chat feature, you could be inadvertently sending the user&#x27;s submitted Shakespeare novel to your AI API, and thus costing you money now!</p>
+<h6>The fix</h6>
+<p>Every endpoint should have a dedicated schema validation tool (such as <a href="https://zod.dev">zod</a>, <a href="https://joi.dev">Joi</a>, whatever your stack uses) on what the request body should look like. Also: reject unknown fields instead of silently accepting them (zod&#x27;s <code>.strict()</code>, Joi&#x27;s <code>stripUnknown</code>), enforce maximum lengths on every string, and never spread the raw request body into a database update. Instead, explicitly pick the fields a user is allowed to change.</p>
+<h2>3. No Rate Limiting</h2>
+<p>It&#x27;s bad enough that people are now sending Shakespeare novels to your app, but what if they wrap this around a looping script and hit all your sensitive endpoints? Your API being called 10,000 times a minute? What will happen exactly? The targets for this are login, password resets, your AI feature endpoints, and anything that can send an e-mail or SMS.</p>
+<h6>The fix</h6>
+<p>Implement server-side rate limiting, such as a fixed-window, sliding-window, or token-bucket limiter per IP and per user, or at least pull in a dependency that can perform some simple level of it (like <a href="https://www.npmjs.com/package/express-rate-limit"><code>express-rate-limit</code></a> if you&#x27;re on Node). Even bare minimum is better than nothing because you can at least prevent a catastrophic disaster. If you have an endpoint that can send e-mails and/or text messages (e.g., e-mail invite, 2FA), make sure these endpoints have a 30 second to 1 minute cooldown between each request being sent.</p>
+<p>Services like Upstash Redis (with their <a href="https://github.com/upstash/ratelimit-js"><code>@upstash/ratelimit</code></a> library) can be enabled on your application in a few lines and give you a sliding-window counter per IP and user.</p>
+<h2>4. Bad file upload validation</h2>
+<p>Some apps I have seen contain some social media aspect, whether it&#x27;s uploading photos, videos, audio, etc.</p>
+<p>What&#x27;s stopping someone from uploading a virus? Sure, it won&#x27;t execute on your server, but your app just became a distribution point: someone downloads an innocent-looking &quot;photo&quot; and it&#x27;s an executable. Or worse... some &quot;image&quot; formats can carry scripts, such as an SVG with JavaScript inside or an HTML file with a renamed extension, and if your app serves that file back and the browser renders it, you&#x27;ve got <a href="https://owasp.org/www-community/attacks/xss/#stored-xss-attacks">stored XSS</a>.</p>
+<h6>The Fix</h6>
+<p>When uploading media, check file types by actual content (<a href="https://en.wikipedia.org/wiki/List_of_file_signatures">magic bytes</a>), not just extension; enforce size limits; strip metadata; and serve uploads from object storage on a separate domain with the correct <code>Content-Type</code> so the browser never renders them as pages. That combo should kill most stored-XSS risks, which is the realistic threat for most apps.</p>
+<p>If your app&#x27;s whole job is distributing files to other users (photo sharing, a marketplace, general file hosting), add actual malware scanning on top.</p>
+<h2>5. Enumeration &amp; Injection Vulnerabilities</h2>
+<p>We&#x27;ve all heard of <a href="https://owasp.org/www-community/attacks/SQL_Injection">SQL Injection</a>. Funny enough I have seen AI do an OK job here, though it still pops up.</p>
+<p>The more interesting one I keep finding are in search and filter features. If your API takes a filter object from the client and passes it more or less directly into a database query, you&#x27;re letting the client write your queries for you. An attacker can send a custom filter that reveals data that should never be reachable, like listing every admin account, or every user with a gmail address. It&#x27;s a bit surprising how often this one has come up.</p>
+<h6>The Fix</h6>
+<p>Never pass client-supplied query structures to the database. Allowlist which fields and operators are filterable on the server, and build the query yourself from those. We can also look at the queries being sent and think: how can we manipulate this query by changing the initial request? We can go from there on fixing it.</p>
+<h2>6. Secrets Leaked</h2>
+<p>This one is not so much the AI&#x27;s fault, since it&#x27;s usually pretty good here. It&#x27;s the humans. I can <em>barely</em> understand the justification if you have a private repo. But if that repo ever goes public, rotate those keys immediately. And remember: git history is forever. Deleting the line in a new commit does nothing; the key is still in the history. Rotation is the only fix.</p>
+<p>We solved this problem ages ago. Please never hardcode API keys in the UI or the backend.</p>
+<h6>The Fix</h6>
+<p>Secrets live in environment variables or a proper vault service, and turn on secret scanning (<a href="https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection">GitHub push protection</a> or <a href="https://github.com/gitleaks/gitleaks">gitleaks</a>) so keys never make it into history in the first place.</p>
+<h2>7. Exposing PII Data</h2>
+<p>This one is a huge problem!! Your API is probably returning more fields than the client needs, and the big one is the customer&#x27;s e-mail.</p>
+<p>If you&#x27;re really trying to get users to use your app, you need to make sure you&#x27;re not sending your customers&#x27; sensitive data out on your API. This is especially common on social type apps of course. E-mail is the biggest problem.</p>
+<h6>The Fix</h6>
+<p>You&#x27;re more than likely storing a customer&#x27;s e-mail; tell your AI to look for <a href="https://en.wikipedia.org/wiki/Personal_data">PII</a> data and see where it&#x27;s being returned on the API. The less information you can provide the better off you are.</p>
+<h2>8. No Logging &amp; Monitoring</h2>
+<p>Picture this: your app stops working, but how long was it down for? An attacker could be hammering your API and you won&#x27;t even know that it&#x27;s happening.</p>
+<p>Or maybe a user hits a problem and reaches out to you for support, but nobody can see what happened, because there&#x27;s no error tracking or metrics. Monitoring isn&#x27;t only for attackers; it&#x27;s how you support real
+users. You won&#x27;t be able to help them at all, and now that bug is off to the wind, never to be understood again.</p>
+<h6>The Fix</h6>
+<p>At minimum, an error tracker (<a href="https://sentry.io/">Sentry</a> or similar), an uptime check, and alerts. This is such an easy thing to add that will save you a TON of problems in the future.</p>
+<h2>9. No Backups</h2>
+<p>This is essential especially if you&#x27;re going to be iterating a lot on your app. If you get real users, and the AI suddenly decides to do a massive database migration because you are adding or changing a new feature. It will hopefully generate a proper runbook, but things don&#x27;t always go smoothly. If you accidentally destroy your database or environment, the quickest way to restore is with a backup. And make sure you are testing them too, because if you have it but never test it, then you don&#x27;t really know if it&#x27;s going to work.</p>
+<h6>The Fix</h6>
+<p>Ask your AI what your backup strategy should be for your system. Everything is different, but something needs to be in place. This especially must be done once you have live customers because you do not want to have data loss; it&#x27;s how you lose customers and their trust!</p>
+<p>Once in place, have automated scheduled backups, and actually run a restore once in a while to prove they work.</p>
+<h2>10. Supply Chain Vulnerabilities</h2>
+<p>AI can and will install dependencies that are old, sometimes with known CVEs. It picked those versions because they were common in its training data, not because they&#x27;re current.</p>
+<h6>The Fix</h6>
+<p>Setup <a href="https://docs.github.com/en/code-security/dependabot">Dependabot</a> (or <a href="https://docs.renovatebot.com/">Renovate</a>), and run <a href="https://docs.npmjs.com/cli/commands/npm-audit"><code>npm audit</code></a> in CI. Neither is perfect, but either one is miles ahead of no CVE checking at all.</p>
+<h2>Bonus Interesting Ones</h2>
+<p>There are more but I think that this covers the vast majority of them, at least the most important ones. I do have some bonus ones that I included that didn&#x27;t really fit being a major mistake/security concern.</p>
+<h3>Admin Panels</h3>
+<p>Admin UI living in the same app as customer-facing code. I find it interesting how common this is, and there&#x27;s nothing wrong with it per se. But imagine if you have an admin panel and your app contains all the 10 issues I mentioned? If someone could just easily escalate their privileges to admin, they have access to all the sensitive data and controls that your admin panel exposes. This just introduces another unnecessary attack vector in your app.</p>
+<h6>The Fix</h6>
+<p>This is more personal opinion, but this is how I would solve it: A separate project entirely, with its own credentials and deployment at something like <code>admin.myapp.com</code>, reachable only over the company (or your own) VPN. Yes, it still needs proper auth (VPN access alone isn&#x27;t authorization) but at least the admin portal isn&#x27;t sitting on the public internet. If that&#x27;s too much work, then <em>at least</em> make it a separate app on a separate domain or subdomain so the two don&#x27;t share the same attack surface.</p>
+<h3>No staging site</h3>
+<p>I don&#x27;t think this is necessary at first, but it definitely should be once you have real users. It can help you have a dedicated place to test and break your app, and avoid the &quot;testing in prod&quot; that you&#x27;re probably doing already.</p>
+<h6>The Fix</h6>
+<p>Ask your AI what existing structures you have for a staging environment, what steps you need to take to create one, and what it would look like based on your current architecture. Come up with a plan (you can ask AI to help here) on how to have a proper code change -&gt; staging -&gt; test -&gt; production deployment flow. You can set up a dedicated pipeline on GitHub or wherever and have it deploy to a dedicated subdomain of the domain name you own.</p>
+<h3>No Privacy Policy, Terms of Service nor GDPR</h3>
+<p>This is the more legal &quot;boring&quot; side of things... but it&#x27;s important to have.</p>
+<p>You need to explain to the user how you are using their data and for what, especially on apps that are charging money.</p>
+<p>On the <a href="https://gdpr.eu/what-is-gdpr/">GDPR</a> front, you more than likely have European users, so it should be taken into account. GDPR applies based on where your <em>users</em> are, not where your company is, and fines can reach €20 million or 4% of global annual revenue, whichever is higher. Start with baby steps.</p>
+<h6>The Fix</h6>
+<p>Use a policy generator (<a href="https://termly.io/products/terms-and-conditions-generator/">Termly</a>, iubenda, GetTerms, or similar) to get a baseline Privacy Policy and Terms of Service up, and link them in your footer and signup flow. Only collect the data you actually need; the less PII you store, the less you have to worry about. For GDPR specifically: add cookie consent if you&#x27;re running analytics or trackers, and make sure a user can request a copy of their data and have their account deleted (the rights of access and erasure).</p>
+<h2>Conclusion + My Skill</h2>
+<p>Checkout my <a href="https://github.com/dannyreg/vibechecktech-skills">skill</a> that should help cover all these issues. This <strong>doesn&#x27;t</strong> replace a proper human code review, audit review and/or pen test. The skill should help you identify these common issues and from there you can take action, either with a specific prompt or resolving it with the proper tools.</p>
+<p>If you&#x27;re a non-technical founder/person that is serious with trying to start something with AI-generated apps, I want to help! Check me out at <a href="https://VibeCheckTech.com">VibeCheckTech.com</a>. You can 100% use these skills and even the ones Anthropic provides, but remember, and I am using Anthropic&#x27;s exact words here, you should treat these tools as <a href="https://github.com/anthropics/claude-code/tree/main/plugins/security-guidance#limitations">&quot;a best-effort assistive tool, not a guarantee. Treat findings as suggestions, not as a substitute for human code review, SAST/DAST, dependency scanning, or pen-testing.&quot;</a>, and <a href="https://support.claude.com/en/articles/11932705-automated-security-reviews-in-claude-code">&quot;While automated security reviews help identify many common vulnerabilities, they should complement, not replace, your existing security practices and manual code reviews.&quot;</a></p>
+<p>The disclaimer under every chat box says &quot;AI can make mistakes.&quot; Your app is not the exception. Review it like you know that.</p>]]></content:encoded>
+  </item>
   <item>
     <title>Ten Common Security Mistakes AI-Generated Apps Make</title>
     <link>https://daniel.reguero.dev/blogs/ten-common-security-mistakes-ai-generated-apps-make</link>
     <guid isPermaLink="true">https://daniel.reguero.dev/blogs/ten-common-security-mistakes-ai-generated-apps-make</guid>
-    <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+    <pubDate>Mon, 17 Aug 2026 00:00:00 GMT</pubDate>
     <category>blogs</category>
     <description><![CDATA[These are the most common security mistakes I have seen AI-generated apps make.]]></description>
     <content:encoded><![CDATA[<p>Shipping an app has never been easier. It&#x27;s really cool to see that more people are getting into software development. Welcome!</p>
-<p>However, more and more projects are being released without doing the most basics of security checks. I&#x27;ve always had a knack for security and breaking apps, so this interested me. I have been working with a few clients and noticed a similar pattern of mistakes that fully AI-generated apps make. So my goal here is to enumarate the most common ones I have seen. I even made a skill to help developers who are helping out other people making apps with AI coding agents.</p>
-<p>I think education into not just how using AI is important, but the security and the bigger picture around software developemnt (beyond the code), is an important aspect to also know and learn when building apps with just Ai.</p>
-<p>So anyways witnout further ado let&#x27;s go down the list! Spoiltes: these</p>
-<p>The goal of the skill I made: These are the most common security mistakes I have seen AI-generated apps make, so we have this skill to identify and report them to us, so that a developer can prove it, enumerate and take appropriate action. The report is then taken into a developers hand or even handed straight back to the person who can take it from there.</p>
-<ol>
-<li>
-<p>Broken Auth: includes IDOR, CSRF, broken access control (OWASP Top 10), also just missing basic auth flows; no password changing, no forgot my password flows, etc. I even saw one where the e-mail switching feature was sent to the wrong e-mail?</p>
-</li>
-<li>
-<p>No Server Side Validation: missing per-route schemas; raw client input written straight to the DB or an LLM call</p>
-</li>
-<li>
-<p>No Rate Limiting: login, password reset, LLM, email/SMS endpoints with no limits</p>
-</li>
-<li>
-<p>Bad file upload validation: type checked only by extension/Content-Type, no size cap, SVG/script uploads</p>
-</li>
-<li>
-<p>Enumeration &amp; Injection Vulnerabilities: string-built queries, user-controlled sort/filter/column params</p>
-</li>
-<li>
-<p>Secrets: Good grief I can’t believe this is still a problem.</p>
-</li>
-<li>
-<p>Exposing PII Data: emails and other PII returned in API responses, search, or social features</p>
-</li>
-<li>
-<p>No Logging &amp; Monitoring: no error capture, no security event logs, no alerting on spikes. Not just for attackers going into the system but also for when users have bugs to report. How will you even know what&#x27;s wrong?</p>
-</li>
-<li>
-<p>No Backups: no backups, or backups that have never been restore-tested</p>
-</li>
-<li>
-<p>Supply Chain Vulnerabilities: AI can install dependencies that are old, and even have known CVEs. even setting up depende bot can be miles ahead, or just run npm audit, even if that isn&#x27;t the best it&#x27;s still better than not having any type of CVE check.</p>
-</li>
-</ol>
-<p>Bonus Interesting Ones:</p>
-<ul>
-<li>Admin Panels: admin UI living in the same app as customer-facing code, under-audited. I find it interesting how common this is, nothing wrong with it per say. But imagine if you have an admin panel and your app contains all the 10 issues I mentioned? Given that if someone could just easily escalate their priviledges to admin, they have access to all the sensitive and controlling data that your admin panel makes.</li>
-</ul>]]></content:encoded>
+<p>However, more and more projects are being released without doing the most basic of security checks.</p>
+<p>I think education into not just how to use AI, but the security and the bigger picture around software development (beyond the code), is an important aspect to also know and learn when building apps with just AI.</p>
+<p>So let&#x27;s go down the list shall we?</p>
+<h2>1. Broken Access Control</h2>
+<p>At number one we have broken access control, which is not only the most common issue I have run into, it&#x27;s also OWASP&#x27;s number one: <a href="https://owasp.org/Top10/2021/A01_2021-Broken_Access_Control/">A01:2021 Broken Access Control</a>. In OWASP&#x27;s dataset, 94% of applications were tested for some form of broken access control, and it had over 318,000 occurrences, which is more than any other category. It&#x27;s <em>that</em> big of a problem!</p>
+<p>It&#x27;s definitely the most serious issue. This can come in different ways and forms, but the most common versions of this that I have seen are: escalating roles from free to pro without paying and accessing/editing resources you don&#x27;t own.</p>
+<h6>The Fix:</h6>
+<p>Your server must check on every request that the authenticated user is actually allowed to touch the resource they&#x27;re asking for. Never trust the client to enforce this. But better yet, if your database can support policies, implement them. Supabase, for example, allows you to set <a href="https://supabase.com/docs/guides/database/postgres/row-level-security">Row Level Security</a>, which lets you write policies directly in Postgres that filter which rows each user can read or write (typically keyed off <code>auth.uid()</code>). That way, even if your app code forgets a check, the database itself refuses to hand over rows that don&#x27;t belong to that user. Consider also the idea <a href="https://www.cloudflare.com/learning/security/glossary/what-is-zero-trust/">zero trust</a> but for your app, where you give the least amount of access to everyone and simply go up from there.</p>
+<h2>2. No Server Side Validation</h2>
+<p>Endpoints can receive essentially any JSON request body and the app will handle it. What happens when a malicious user sends a Shakespeare novel instead of their first name? It might be funny, but it&#x27;s not something you want to be dealing with. And what if it&#x27;s not a long text but a malicious HTML/script tag that your website then renders on the page? Now you&#x27;re open to <a href="https://owasp.org/www-community/attacks/xss/">XSS</a>.</p>
+<p>The nastier version I&#x27;ve seen is when update endpoints accept <em>any</em> field you send them, allowing you to update properties on the database schema without any checks. If there&#x27;s no validation on your &quot;update account&quot; endpoint, a user can simply upgrade their free account to pro for free (which is still part of broken access control and pertains to permission checks). Or what if you have AI features paywalled, but you give a user three tries to try out the AI feature? Well with no request validation, you can simply send a request like so</p>
+<pre><code class="language-bash">curl -X PATCH https://myapp.com/api/me \
+  -H &quot;Authorization: Bearer &lt;your-own-token&gt;&quot; \
+  -d &#x27;{&quot;plan&quot;: &quot;pro&quot;, &quot;aiCreditsRemaining&quot;: 999999}&#x27;
+</code></pre>
+<p>This won&#x27;t just affect your database, it can also affect third-party APIs that you&#x27;re using. If you aren&#x27;t validating the user&#x27;s input when you send their request to your AI chat feature, you could be inadvertently sending the user&#x27;s submitted Shakespeare novel to your AI API, and thus costing you money now!</p>
+<h6>The fix</h6>
+<p>Every endpoint should have a dedicated schema validation tool (such as <a href="https://zod.dev">zod</a>, <a href="https://joi.dev">Joi</a>, whatever your stack uses) on what the request body should look like. Also: reject unknown fields instead of silently accepting them (zod&#x27;s <code>.strict()</code>, Joi&#x27;s <code>stripUnknown</code>), enforce maximum lengths on every string, and never spread the raw request body into a database update. Instead, explicitly pick the fields a user is allowed to change.</p>
+<h2>3. No Rate Limiting</h2>
+<p>It&#x27;s bad enough that people are now sending Shakespeare novels to your app, but what if they wrap this around a looping script and hit all your sensitive endpoints? Your API being called 10,000 times a minute? What will happen exactly? The targets for this are login, password resets, your AI feature endpoints, and anything that can send an e-mail or SMS.</p>
+<h6>The fix</h6>
+<p>Implement server-side rate limiting, such as a fixed-window, sliding-window, or token-bucket limiter per IP and per user, or at least pull in a dependency that can perform some simple level of it (like <a href="https://www.npmjs.com/package/express-rate-limit"><code>express-rate-limit</code></a> if you&#x27;re on Node). Even bare minimum is better than nothing because you can at least prevent a catastrophic disaster. If you have an endpoint that can send e-mails and/or text messages (e.g., e-mail invite, 2FA), make sure these endpoints have a 30 second to 1 minute cooldown between each request being sent.</p>
+<p>Services like Upstash Redis (with their <a href="https://github.com/upstash/ratelimit-js"><code>@upstash/ratelimit</code></a> library) can be enabled on your application in a few lines and give you a sliding-window counter per IP and user.</p>
+<h2>4. Bad file upload validation</h2>
+<p>Some apps I have seen contain some social media aspect, whether it&#x27;s uploading photos, videos, audio, etc.</p>
+<p>What&#x27;s stopping someone from uploading a virus? Sure, it won&#x27;t execute on your server, but your app just became a distribution point: someone downloads an innocent-looking &quot;photo&quot; and it&#x27;s an executable. Or worse... some &quot;image&quot; formats can carry scripts, such as an SVG with JavaScript inside or an HTML file with a renamed extension, and if your app serves that file back and the browser renders it, you&#x27;ve got <a href="https://owasp.org/www-community/attacks/xss/#stored-xss-attacks">stored XSS</a>.</p>
+<h6>The Fix</h6>
+<p>When uploading media, check file types by actual content (<a href="https://en.wikipedia.org/wiki/List_of_file_signatures">magic bytes</a>), not just extension; enforce size limits; strip metadata; and serve uploads from object storage on a separate domain with the correct <code>Content-Type</code> so the browser never renders them as pages. That combo should kill most stored-XSS risks, which is the realistic threat for most apps.</p>
+<p>If your app&#x27;s whole job is distributing files to other users (photo sharing, a marketplace, general file hosting), add actual malware scanning on top.</p>
+<h2>5. Enumeration &amp; Injection Vulnerabilities</h2>
+<p>We&#x27;ve all heard of <a href="https://owasp.org/www-community/attacks/SQL_Injection">SQL Injection</a>. Funny enough I have seen AI do an OK job here, though it still pops up.</p>
+<p>The more interesting one I keep finding are in search and filter features. If your API takes a filter object from the client and passes it more or less directly into a database query, you&#x27;re letting the client write your queries for you. An attacker can send a custom filter that reveals data that should never be reachable, like listing every admin account, or every user with a gmail address. It&#x27;s a bit surprising how often this one has come up.</p>
+<h6>The Fix</h6>
+<p>Never pass client-supplied query structures to the database. Allowlist which fields and operators are filterable on the server, and build the query yourself from those. We can also look at the queries being sent and think: how can we manipulate this query by changing the initial request? We can go from there on fixing it.</p>
+<h2>6. Secrets Leaked</h2>
+<p>This one is not so much the AI&#x27;s fault, since it&#x27;s usually pretty good here. It&#x27;s the humans. I can <em>barely</em> understand the justification if you have a private repo. But if that repo ever goes public, rotate those keys immediately. And remember: git history is forever. Deleting the line in a new commit does nothing; the key is still in the history. Rotation is the only fix.</p>
+<p>We solved this problem ages ago. Please never hardcode API keys in the UI or the backend.</p>
+<h6>The Fix</h6>
+<p>Secrets live in environment variables or a proper vault service, and turn on secret scanning (<a href="https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection">GitHub push protection</a> or <a href="https://github.com/gitleaks/gitleaks">gitleaks</a>) so keys never make it into history in the first place.</p>
+<h2>7. Exposing PII Data</h2>
+<p>This one is a huge problem!! Your API is probably returning more fields than the client needs, and the big one is the customer&#x27;s e-mail.</p>
+<p>If you&#x27;re really trying to get users to use your app, you need to make sure you&#x27;re not sending your customers&#x27; sensitive data out on your API. This is especially common on social type apps of course. E-mail is the biggest problem.</p>
+<h6>The Fix</h6>
+<p>You&#x27;re more than likely storing a customer&#x27;s e-mail; tell your AI to look for <a href="https://en.wikipedia.org/wiki/Personal_data">PII</a> data and see where it&#x27;s being returned on the API. The less information you can provide the better off you are.</p>
+<h2>8. No Logging &amp; Monitoring</h2>
+<p>Picture this: your app stops working, but how long was it down for? An attacker could be hammering your API and you won&#x27;t even know that it&#x27;s happening.</p>
+<p>Or maybe a user hits a problem and reaches out to you for support, but nobody can see what happened, because there&#x27;s no error tracking or metrics. Monitoring isn&#x27;t only for attackers; it&#x27;s how you support real
+users. You won&#x27;t be able to help them at all, and now that bug is off to the wind, never to be understood again.</p>
+<h6>The Fix</h6>
+<p>At minimum, an error tracker (<a href="https://sentry.io/">Sentry</a> or similar), an uptime check, and alerts. This is such an easy thing to add that will save you a TON of problems in the future.</p>
+<h2>9. No Backups</h2>
+<p>This is essential especially if you&#x27;re going to be iterating a lot on your app. If you get real users, and the AI suddenly decides to do a massive database migration because you are adding or changing a new feature. It will hopefully generate a proper runbook, but things don&#x27;t always go smoothly. If you accidentally destroy your database or environment, the quickest way to restore is with a backup. And make sure you are testing them too, because if you have it but never test it, then you don&#x27;t really know if it&#x27;s going to work.</p>
+<h6>The Fix</h6>
+<p>Ask your AI what your backup strategy should be for your system. Everything is different, but something needs to be in place. This especially must be done once you have live customers because you do not want to have data loss; it&#x27;s how you lose customers and their trust!</p>
+<p>Once in place, have automated scheduled backups, and actually run a restore once in a while to prove they work.</p>
+<h2>10. Supply Chain Vulnerabilities</h2>
+<p>AI can and will install dependencies that are old, sometimes with known CVEs. It picked those versions because they were common in its training data, not because they&#x27;re current.</p>
+<h6>The Fix</h6>
+<p>Setup <a href="https://docs.github.com/en/code-security/dependabot">Dependabot</a> (or <a href="https://docs.renovatebot.com/">Renovate</a>), and run <a href="https://docs.npmjs.com/cli/commands/npm-audit"><code>npm audit</code></a> in CI. Neither is perfect, but either one is miles ahead of no CVE checking at all.</p>
+<h2>Bonus Interesting Ones</h2>
+<p>There are more but I think that this covers the vast majority of them, at least the most important ones. I do have some bonus ones that I included that didn&#x27;t really fit being a major mistake/security concern.</p>
+<h3>Admin Panels</h3>
+<p>Admin UI living in the same app as customer-facing code. I find it interesting how common this is, and there&#x27;s nothing wrong with it per se. But imagine if you have an admin panel and your app contains all the 10 issues I mentioned? If someone could just easily escalate their privileges to admin, they have access to all the sensitive data and controls that your admin panel exposes. This just introduces another unnecessary attack vector in your app.</p>
+<h6>The Fix</h6>
+<p>This is more personal opinion, but this is how I would solve it: A separate project entirely, with its own credentials and deployment at something like <code>admin.myapp.com</code>, reachable only over the company (or your own) VPN. Yes, it still needs proper auth (VPN access alone isn&#x27;t authorization) but at least the admin portal isn&#x27;t sitting on the public internet. If that&#x27;s too much work, then <em>at least</em> make it a separate app on a separate domain or subdomain so the two don&#x27;t share the same attack surface.</p>
+<h3>No staging site</h3>
+<p>I don&#x27;t think this is necessary at first, but it definitely should be once you have real users. It can help you have a dedicated place to test and break your app, and avoid the &quot;testing in prod&quot; that you&#x27;re probably doing already.</p>
+<h6>The Fix</h6>
+<p>Ask your AI what existing structures you have for a staging environment, what steps you need to take to create one, and what it would look like based on your current architecture. Come up with a plan (you can ask AI to help here) on how to have a proper code change -&gt; staging -&gt; test -&gt; production deployment flow. You can set up a dedicated pipeline on GitHub or wherever and have it deploy to a dedicated subdomain of the domain name you own.</p>
+<h3>No Privacy Policy, Terms of Service nor GDPR</h3>
+<p>This is the more legal &quot;boring&quot; side of things... but it&#x27;s important to have.</p>
+<p>You need to explain to the user how you are using their data and for what, especially on apps that are charging money.</p>
+<p>On the <a href="https://gdpr.eu/what-is-gdpr/">GDPR</a> front, you more than likely have European users, so it should be taken into account. GDPR applies based on where your <em>users</em> are, not where your company is, and fines can reach €20 million or 4% of global annual revenue, whichever is higher. Start with baby steps.</p>
+<h6>The Fix</h6>
+<p>Use a policy generator (<a href="https://termly.io/products/terms-and-conditions-generator/">Termly</a>, iubenda, GetTerms, or similar) to get a baseline Privacy Policy and Terms of Service up, and link them in your footer and signup flow. Only collect the data you actually need; the less PII you store, the less you have to worry about. For GDPR specifically: add cookie consent if you&#x27;re running analytics or trackers, and make sure a user can request a copy of their data and have their account deleted (the rights of access and erasure).</p>
+<h2>Conclusion + My Skill</h2>
+<p>Checkout my <a href="https://github.com/dannyreg/vibechecktech-skills">skill</a> that should help cover all these issues. This <strong>doesn&#x27;t</strong> replace a proper human code review, audit review and/or pen test. The skill should help you identify these common issues and from there you can take action, either with a specific prompt or resolving it with the proper tools.</p>
+<p>If you&#x27;re a non-technical founder/person that is serious with trying to start something with AI-generated apps, I want to help! Check me out at <a href="https://VibeCheckTech.com">VibeCheckTech.com</a>. You can 100% use these skills and even the ones Anthropic provides, but remember, and I am using Anthropic&#x27;s exact words here, you should treat these tools as <a href="https://github.com/anthropics/claude-code/tree/main/plugins/security-guidance#limitations">&quot;a best-effort assistive tool, not a guarantee. Treat findings as suggestions, not as a substitute for human code review, SAST/DAST, dependency scanning, or pen-testing.&quot;</a>, and <a href="https://support.claude.com/en/articles/11932705-automated-security-reviews-in-claude-code">&quot;While automated security reviews help identify many common vulnerabilities, they should complement, not replace, your existing security practices and manual code reviews.&quot;</a></p>
+<p>The disclaimer under every chat box says &quot;AI can make mistakes.&quot; Your app is not the exception. Review it like you know that.</p>]]></content:encoded>
   </item>
   <item>
     <title>Another Public API Has Been Walled Off</title>
